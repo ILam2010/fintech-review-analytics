@@ -98,3 +98,109 @@ fintech-review-analytics/
 ## 👨Author
 
 Data Engineering Project – Omega Consultancy Simulation
+
+
+
+#  Database Engineering (Task 3)
+
+## PostgreSQL Setup
+
+PostgreSQL was used to store the cleaned and processed banking app reviews in a relational database format.
+
+### Database Name
+
+bank_reviews
+
+### Tools Used
+
+* PostgreSQL
+* pgAdmin
+* psycopg2
+* SQL
+
+## Database Schema
+
+Two relational tables were created:
+
+### 1. banks
+
+Stores metadata about the banking applications.
+
+| Column    | Type               | Description             |
+| --------- | ------------------ | ----------------------- |
+| bank_id   | SERIAL PRIMARY KEY | Unique bank identifier  |
+| bank_name | VARCHAR(100)       | Name of the bank        |
+| app_name  | VARCHAR(150)       | Mobile application name |
+
+
+
+### 2. reviews
+
+Stores cleaned and processed customer reviews.
+
+| Column          | Type               | Description                         |
+| --------------- | ------------------ | ----------------------------------- |
+| review_id       | SERIAL PRIMARY KEY | Unique review identifier            |
+| bank_id         | INTEGER            | Foreign key referencing banks table |
+| review_text     | TEXT               | Customer review text                |
+| rating          | INTEGER            | Star rating (1–5)                   |
+| review_date     | DATE               | Review submission date              |
+| sentiment_label | VARCHAR(20)        | Sentiment classification            |
+| sentiment_score | FLOAT              | Sentiment confidence score          |
+| theme           | VARCHAR(100)       | Extracted review theme              |
+| source          | VARCHAR(50)        | Data source                         |
+
+
+
+## Data Loading Pipeline
+
+A Python ETL script using `psycopg2` was implemented to:
+
+1. Connect to PostgreSQL
+2. Insert bank metadata into the `banks` table
+3. Insert processed reviews into the `reviews` table
+4. Maintain relational integrity using foreign keys
+
+Main script:
+scripts/load_to_postgres.py
+
+## Verification Queries
+
+The following SQL queries were executed to verify data integrity:
+
+### Count reviews per bank
+
+```sql id="r4"
+SELECT b.bank_name, COUNT(*) AS total_reviews
+FROM reviews r
+JOIN banks b
+ON r.bank_id = b.bank_id
+GROUP BY b.bank_name;
+```
+
+### Average rating per bank
+
+```sql id="r5"
+SELECT b.bank_name, AVG(r.rating) AS average_rating
+FROM reviews r
+JOIN banks b
+ON r.bank_id = b.bank_id
+GROUP BY b.bank_name;
+```
+
+### Null check for review text
+
+```sql id="r6"
+SELECT *
+FROM reviews
+WHERE review_text IS NULL;
+```
+
+
+
+## Outcome
+
+* Successfully inserted 1,000+ processed reviews into PostgreSQL
+* Verified relational integrity between tables
+* Confirmed no null values in key review fields
+
